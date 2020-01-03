@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AlphaVantage.Net.Core;
 using AlphaVantage.Net.Stocks.BatchQuotes;
@@ -25,6 +26,15 @@ namespace AlphaVantage.Net.Stocks
             
             _apiKey = apiKey;
             _coreClient = new AlphaVantageCoreClient();
+            _parser = new StockDataParser();
+        }
+
+        public AlphaVantageStocksClient(string apiKey, HttpClient httpClient)
+        {
+            if (string.IsNullOrWhiteSpace(apiKey)) throw new ArgumentNullException(nameof(apiKey));
+
+            _apiKey = apiKey;
+            _coreClient = new AlphaVantageCoreClient(httpClient: httpClient);
             _parser = new StockDataParser();
         }
 

@@ -21,10 +21,19 @@ namespace AlphaVantage.Net.Core
         [CanBeNull]
         private readonly TimeSpan? _timeout;
 
-        private static IHttpClient _client = new HttpClientWithRateLimit(new HttpClient(), 20, 10);
+        private static IHttpClient _client;
 
-        public AlphaVantageCoreClient(IApiCallValidator apiCallValidator = null, TimeSpan? timeout = null)
+        public AlphaVantageCoreClient(IApiCallValidator apiCallValidator = null, TimeSpan? timeout = null, HttpClient httpClient = null)
         {
+            if (httpClient != null)
+            {
+                _client = new HttpClientWithRateLimit(httpClient, 20, 10);
+            }
+            else
+            {
+                _client = new HttpClientWithRateLimit(new HttpClient(), 20, 10);
+            }
+
             _apiCallValidator = apiCallValidator;
             _timeout = timeout;
         }

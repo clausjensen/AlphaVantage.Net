@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using AlphaVantage.Net.Stocks.TimeSeries;
@@ -150,6 +152,30 @@ namespace AlphaVantage.Net.Stocks.Tests
                 result.Any(r => r.Symbol == "MSFT") &&
                 result.Any(r => r.Symbol == "FB") && 
                 result.Any(r => r.Symbol == "AAPL"));
+        }
+
+        [Fact]
+        public async Task Proxy_Test()
+        {
+            var httpClientHandler = new HttpClientHandler()
+            {
+                Proxy = new WebProxy("127.0.0.1:8080"),
+                UseProxy = true
+            };
+            var httpClient = new HttpClient(httpClientHandler);
+            var client = new AlphaVantageStocksClient(ApiKey, httpClient);
+
+            var result =
+                await client.RequestWeeklyTimeSeriesAsync(Symbol, adjusted: false);
+
+            Assert.NotNull(result);
+            Assert.Equal(TimeSeriesType.Weekly, result.Type);
+            Assert.Equal(Symbol, result.Symbol);
+            Assert.False(result.IsAdjusted);
+            Assert.NotNull(result.DataPoints);
+            Assert.True(result.DataPoints.All(p =>
+                p.GetType() == typeof(StockDataPoint) &&
+                p.GetType() != typeof(StockAdjustedDataPoint)));
         }
     }
 }
